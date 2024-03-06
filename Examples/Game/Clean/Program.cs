@@ -3,164 +3,234 @@ using System.Collections.Generic;
 
 public class Game
 {
+    private enum Command
+    {
+        Unknown,
+        Exit,
+        Move,
+        Pick,
+        Use,
+        Help,
+    }
+
+    private enum Direction
+    {
+        Unknown,
+        North,
+        South,
+        East,
+        West,
+    }
+
+    private enum Action
+    {
+        Unknown,
+        Fight,
+        Run,
+    }
+
     private int x = 0, y = 0;
     private List<string> items = new List<string>();
     private int health = 10;
     private bool gameRunning = true;
     private Random rand = new Random();
 
-
-    public int showOptions(string command)
-    {
-        if (command == "command")
-        {
-            Console.WriteLine("move <direction>, pick <object>, use <object>");
-            return 0;
-        }
-        else if (command == "move")
-        {
-            Console.WriteLine("north, south, east, west");
-            return 0;
-        }
-        else if (command == "pick")
-        {
-            Console.WriteLine("You can pick anything!!");
-            return 0;
-        }
-        else if (command == "use")
-        {
-            if (items.Count > 0)
-            {
-                Console.WriteLine(String.Join(", ", items));
-            }
-            else
-            {
-                Console.WriteLine("There is nothing to use ):");
-            }
-            return 0;
-        }
-        return 1;
-    }
-
-    public void startGame()
+    public void StartGame()
     {
         Console.WriteLine("Game started. Type 'exit' to quit.");
         while (gameRunning)
         {
             Console.Write("Enter command: ");
-            string c = Console.ReadLine();
-            doCommand(c);
+            string userInput = Console.ReadLine();
+            ProcessCommand(userInput.Trim().ToLower());
         }
     }
 
-    private void doCommand(string c)
+    private void ProcessCommand(string userInput)
     {
-        if (c.ToLower() == "exit")
+        string[] parts = userInput.Split(' ', 2);
+        Command command = ParseCommand(parts[0]);
+        string argument = parts.Length > 1 ? parts[1] : "";
+
+        switch (command)
         {
-            gameRunning = false;
-            Console.WriteLine("Game exited.");
+            case Command.Exit: ExitGame(); break;
+            case Command.Move: MovePlayer(ParseDirection(argument)); break;
+            case Command.Pick: PickItem(argument); break;
+            case Command.Use: UseItem(argument); break;
+            case Command.Help: ShowHelp(); break;
+            default: ShowUnknownCommandMessage(); break;
+        }
+    }
+
+    private Command ParseCommand(string command)
+    {
+        return command switch
+        {
+            "exit" => Command.Exit,
+            "move" => Command.Move,
+            "pick" => Command.Pick,
+            "use" => Command.Use,
+            "?" => Command.Help,
+            _ => Command.Unknown,
+        };
+    }
+
+    private Direction ParseDirection(string direction)
+    {
+        return direction switch
+        {
+            "north" => Direction.North,
+            "south" => Direction.South,
+            "east" => Direction.East,
+            "west" => Direction.West,
+            _ => Direction.Unknown,
+        };
+    }
+
+    private Action ParseAction(string action)
+    {
+        return action switch
+        {
+            "fight" => Action.Fight,
+            "run" => Action.Run,
+            _ => Action.Unknown,
+        };
+    }
+
+    private void MovePlayer(Direction direction)
+    {
+        bool moved = direction switch
+        {
+            Direction.North => (++y, true).Item2,
+            Direction.South => (--y, true).Item2,
+            Direction.East => (++x, true).Item2,
+            Direction.West => (--x, true).Item2,
+            _ => false,
+        };
+
+        if (!moved)
+        {
+            Console.WriteLine("Invalid direction. Try 'move <north|south|east|west>'.");
             return;
         }
 
-        var parts = c.Split(' ');
-        var command = parts[0].ToLower();
-        var arg = parts.Length > 1 ? parts[1] : "";
+        Console.WriteLine($"Position: {x}, {y}");
+        RandomEncounter();
+    }
 
-        if (command == "move")
+    private void PickItem(string item)
+    {
+        if (string.IsNullOrEmpty(item))
         {
-            if (arg == "north") y++;
-            else if (arg == "south") y--;
-            else if (arg == "east") x++;
-            else if (arg == "west") x--;
-            else if (arg == "?") showOptions("move");
-            else Console.WriteLine("move where?");
-            Console.WriteLine("Position: " + x + ", " + y);
+            Console.WriteLine("Pick what?");
+            return;
+        }
 
-            if (rand.Next(0, 5) == 2)
-            {
-                Console.WriteLine("Encountered an enemy!");
-                int enemyHealth = 5;
-                while (enemyHealth > 0 && health > 0)
-                {
-                    Console.WriteLine("Fight or Run?");
-                    var action = Console.ReadLine().ToLower();
-                    if (action == "fight")
-                    {
-                        Console.WriteLine("You hit the enemy!");
-                        enemyHealth -= 2;
-                        if (enemyHealth <= 0)
-                        {
-                            Console.WriteLine("Enemy defeated!");
-                            break;
-                        }
+        items.Add(item);
+        Console.WriteLine($"Got {item}");
+    }
 
-                        Console.WriteLine("Enemy hits you!");
-                        health -= 2;
-                        if (health <= 0)
-                        {
-                            Console.WriteLine("You are defeated!");
-                            gameRunning = false; // End game loop on defeat
-                            return;
-                        }
-                    }
-                    else if (action == "run")
-                    {
-                        Console.WriteLine("You ran away!");
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid action!");
-                    }
-                }
-            }
-        }
-        else if (command == "pick")
+    private void UseItem(string item)
+    {
+        if (string.IsNullOrEmpty(item))
         {
-            if (arg == "?")
-            {
-                showOptions("pick");
-            }
-            else if (arg != "")
-            {
-                items.Add(arg);
-                Console.WriteLine("Got " + arg);
-            }
-            else Console.WriteLine("pick what?");
+            Console.WriteLine("Use what?");
+            return;
         }
-        else if (command == "use")
+
+        if (items.Remove(item))
         {
-            if (arg == "?")
-            {
-                showOptions("use");
-            }
-            else if (arg != "")
-            {
-                if (items.Contains(arg))
-                {
-                    Console.WriteLine("Using " + arg);
-                    items.Remove(arg);
-                }
-                else Console.WriteLine("Don't have " + arg);
-            }
-            else Console.WriteLine("use what?");
+            Console.WriteLine($"Using {item}");
         }
-        else if (command == "?")
+        else
         {
-            showOptions("command");
+            Console.WriteLine($"Don't have {item}");
         }
-        else Console.WriteLine("What?");
+    }
+
+    private void ShowHelp()
+    {
+        Console.WriteLine("Available commands:");
+        Console.WriteLine("move <north|south|east|west> - Move in a direction");
+        Console.WriteLine("pick <item> - Pick up an item");
+        Console.WriteLine("use <item> - Use an item");
+        Console.WriteLine("exit - Exit the game");
+        Console.WriteLine("? - Show this help message");
+    }
+
+    private void ShowUnknownCommandMessage()
+    {
+        Console.WriteLine("Unknown command. Try '?' for help.");
+    }
+
+    private void ExitGame()
+    {
+        gameRunning = false;
+        Console.WriteLine("Game exited.");
+    }
+
+    private void RandomEncounter()
+    {
+        if (rand.Next(0, 5) == 2)
+        {
+            EncounterEnemy();
+        }
+    }
+
+    private void EncounterEnemy()
+    {
+        Console.WriteLine("Encountered an enemy!");
+        int enemyHealth = 5;
+        while (enemyHealth > 0 && health > 0)
+        {
+            Console.WriteLine("Fight or Run?");
+            Action action = ParseAction(Console.ReadLine().ToLower());
+
+            switch (action)
+            {
+                case Action.Fight:
+                    enemyHealth = PerformFightAction(enemyHealth);
+                    break;
+                case Action.Run:
+                    Console.WriteLine("You ran away!");
+                    return;
+                default:
+                    Console.WriteLine("Invalid action!");
+                    break;
+            }
+        }
+    }
+
+    private int PerformFightAction(int enemyHealth)
+    {
+        Console.WriteLine("You hit the enemy!");
+        enemyHealth -= 2;
+
+        if (enemyHealth > 0)
+        {
+            Console.WriteLine("Enemy hits you!");
+            health -= 2;
+
+            if (health <= 0)
+            {
+                Console.WriteLine("You are defeated!");
+                gameRunning = false;
+            }
+        }
+        else
+        {
+            Console.WriteLine("Enemy defeated!");
+        }
+
+        return enemyHealth;
     }
 }
 
-
-static class Program
+class Program
 {
-    static int Main(string[] args)
+    static void Main(string[] args)
     {
-        System.Console.WriteLine("Hello world");
-        Game game = new Game();
-        game.startGame();
-        return 0;
+        new Game().StartGame();
     }
 }
