@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "4sM5G0U9GT+tmYc8dU96czXeaR6AWc9v7LK0Up5LHWzxuGzqIdrbpZr3lQHJlpXWivuhj/DWD8FTJElsrV24tw==",
+  "success": true,
+  "projectFilePath": "/home/jorenchik/clean-code-02-functions/Examples/Game/Clean/NonClean.csproj",
+  "expectedPackageFiles": [
+    "/home/jorenchik/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.1/microsoft.aspnetcore.app.ref.8.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
