@@ -20,6 +20,38 @@ public class Game
         }
     }
 
+    public int showOptions(string command)
+    {
+        if (command == "command")
+        {
+            Console.WriteLine("move <direction>, pick <object>, use <object>");
+            return 0;
+        }
+        else if (command == "move")
+        {
+            Console.WriteLine("north, south, east, west");
+            return 0;
+        }
+        else if (command == "pick")
+        {
+            Console.WriteLine("You can pick anything!!");
+            return 0;
+        }
+        else if (command == "use")
+        {
+            if (items.Count > 0)
+            {
+                Console.WriteLine(String.Join(", ", items));
+            }
+            else
+            {
+                Console.WriteLine("There is nothing to use ):");
+            }
+            return 0;
+        }
+        return 1;
+    }
+
     private void doSomething(string c)
     {
         if (c.ToLower() == "exit")
@@ -39,6 +71,7 @@ public class Game
             else if (arg == "south") y--;
             else if (arg == "east") x++;
             else if (arg == "west") x--;
+            else if (arg == "?") showOptions("move");
             else Console.WriteLine("move where?");
             Console.WriteLine("Position: " + x + ", " + y);
 
@@ -83,7 +116,11 @@ public class Game
         }
         else if (command == "pick")
         {
-            if (arg != "")
+            if (arg == "?")
+            {
+                showOptions("pick");
+            }
+            else if (arg != "")
             {
                 items.Add(arg);
                 Console.WriteLine("Got " + arg);
@@ -92,7 +129,11 @@ public class Game
         }
         else if (command == "use")
         {
-            if (arg != "")
+            if (arg == "?")
+            {
+                showOptions("use");
+            }
+            else if (arg != "")
             {
                 if (items.Contains(arg))
                 {
@@ -102,6 +143,10 @@ public class Game
                 else Console.WriteLine("Don't have " + arg);
             }
             else Console.WriteLine("use what?");
+        }
+        else if (command == "?")
+        {
+            showOptions("command");
         }
         else Console.WriteLine("What?");
     }
