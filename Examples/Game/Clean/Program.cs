@@ -100,6 +100,18 @@ public class Game
 
     private void MovePlayer(Direction direction)
     {
+        bool moved = ChangePositionForMovement(direction);
+        if (!moved)
+        {
+            Console.WriteLine("Invalid direction. Try 'move <north|south|east|west>'.");
+            return;
+        }
+        Console.WriteLine($"Position: {x}, {y}");
+        RandomEncounter();
+    }
+
+    private bool ChangePositionForMovement(Direction direction)
+    {
         bool moved = direction switch
         {
             Direction.North => (++y, true).Item2,
@@ -108,15 +120,7 @@ public class Game
             Direction.West => (--x, true).Item2,
             _ => false,
         };
-
-        if (!moved)
-        {
-            Console.WriteLine("Invalid direction. Try 'move <north|south|east|west>'.");
-            return;
-        }
-
-        Console.WriteLine($"Position: {x}, {y}");
-        RandomEncounter();
+        return moved;
     }
 
     private void PickItem(string item)
