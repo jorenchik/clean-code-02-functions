@@ -9,16 +9,6 @@ public class Game
     private bool gameRunning = true;
     private Random rand = new Random();
 
-    public void startGame()
-    {
-        Console.WriteLine("Game started. Type 'exit' to quit.");
-        while (gameRunning)
-        {
-            Console.Write("Enter command: ");
-            string c = Console.ReadLine();
-            doSomething(c);
-        }
-    }
 
     public int showOptions(string command)
     {
@@ -52,7 +42,18 @@ public class Game
         return 1;
     }
 
-    private void doSomething(string c)
+    public void startGame()
+    {
+        Console.WriteLine("Game started. Type 'exit' to quit.");
+        while (gameRunning)
+        {
+            Console.Write("Enter command: ");
+            string c = Console.ReadLine();
+            doCommand(c);
+        }
+    }
+
+    private void doCommand(string c)
     {
         if (c.ToLower() == "exit")
         {
