@@ -46,17 +46,9 @@ public class Game
         string[] parts = userInput.Split(' ', 2);
         Command command = ParseCommand(parts[0]);
         string argument = parts.Length > 1 ? parts[1] : "";
-
-        switch (command)
-        {
-            case Command.Exit: ExitGame(); break;
-            case Command.Move: TryMovingPlayer(ParseDirection(argument)); break;
-            case Command.Pick: PickItem(argument); break;
-            case Command.Use: UseItem(argument); break;
-            case Command.Help: WriteHelpLines(); break;
-            default: WriteUnknownCommandMessage(); break;
-        }
+        ExecuteCommandWithArgument(command, argument);
     }
+
 
     private Command ParseCommand(string command)
     {
@@ -69,6 +61,18 @@ public class Game
             "?" => Command.Help,
             _ => Command.Unknown,
         };
+    }
+
+    private void ExecuteCommandWithArgument(Command command, string argument) {
+        switch (command)
+        {
+            case Command.Exit: ExitGame(); break;
+            case Command.Move: TryMovingPlayer(ParseDirection(argument)); break;
+            case Command.Pick: PickItem(argument); break;
+            case Command.Use: UseItem(argument); break;
+            case Command.Help: WriteHelpLines(); break;
+            default: WriteUnknownCommandMessage(); break;
+        }
     }
 
     private void ExitGame()
