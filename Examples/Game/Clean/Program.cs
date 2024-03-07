@@ -25,7 +25,10 @@ public class Game
     private int playersHealth = 10;
     private bool isGameRunning = true;
     private Random rand = new Random();
-    private const int enemyHealth = 5;
+    private int enemyHealth = 5;
+    private const int enemyHealthReduction = 2;
+    private const int oneOverNEncounterProbability = 5;
+
 
     public void StartGame()
     {
@@ -92,7 +95,7 @@ public class Game
 
     private void RandomEncounter()
     {
-        if (rand.Next(0, 5) == 2)
+        if (rand.Next(0, oneOverNEncounterProbability) == 2)
         {
             EncounterEnemy();
         }
@@ -164,15 +167,15 @@ public class Game
     private void EncounterEnemy()
     {
         Console.WriteLine("Encountered an enemy!");
-        InteractWithEnemyWhileEitherAlive(enemyHealth);
+        InteractWithEnemyWhileEitherAlive();
     }
 
-    private void InteractWithEnemyWhileEitherAlive(int enemyHealth)
+    private void InteractWithEnemyWhileEitherAlive()
     {
         while (enemyHealth > 0 && playersHealth > 0)
         {
             Action action = ParseEnemyAction();
-            TakeEnemyActionWithHealth(action, enemyHealth);
+            TakeEnemyActionWithHealth(action);
         }
 
     }
@@ -184,12 +187,12 @@ public class Game
         return action;
     }
 
-    private void TakeEnemyActionWithHealth(Action action, int enemyHealth)
+    private void TakeEnemyActionWithHealth(Action action)
     {
         switch (action)
         {
             case Action.Fight:
-                enemyHealth = PerformFightAction(enemyHealth);
+                PerformFightAction();
                 break;
             case Action.Run:
                 Console.WriteLine("You ran away!");
@@ -200,10 +203,10 @@ public class Game
         }
     }
 
-    private int PerformFightAction(int enemyHealth)
+    private int PerformFightAction()
     {
         Console.WriteLine("You hit the enemy!");
-        enemyHealth -= 2;
+        enemyHealth -= enemyHealthReduction;
         if (enemyHealth > 0)
             HandleEnemyHit();
         else
