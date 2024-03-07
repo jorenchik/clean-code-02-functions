@@ -31,14 +31,15 @@ public class Game
 
     private int x = 0, y = 0;
     private List<string> items = new List<string>();
-    private int health = 10;
-    private bool gameRunning = true;
+    private int playersHealth = 10;
+    private bool isGameRunning = true;
     private Random rand = new Random();
+    private const int enemyHealth = 5;
 
     public void StartGame()
     {
         Console.WriteLine("Game started. Type 'exit' to quit.");
-        while (gameRunning)
+        while (isGameRunning)
         {
             Console.Write("Enter command: ");
             string userInput = Console.ReadLine();
@@ -58,8 +59,8 @@ public class Game
             case Command.Move: MovePlayer(ParseDirection(argument)); break;
             case Command.Pick: PickItem(argument); break;
             case Command.Use: UseItem(argument); break;
-            case Command.Help: ShowHelp(); break;
-            default: ShowUnknownCommandMessage(); break;
+            case Command.Help: WriteHelpLines(); break;
+            default: WriteUnknownCommandMessage(); break;
         }
     }
 
@@ -130,7 +131,6 @@ public class Game
             Console.WriteLine("Pick what?");
             return;
         }
-
         items.Add(item);
         Console.WriteLine($"Got {item}");
     }
@@ -142,7 +142,6 @@ public class Game
             Console.WriteLine("Use what?");
             return;
         }
-
         if (items.Remove(item))
         {
             Console.WriteLine($"Using {item}");
@@ -153,7 +152,7 @@ public class Game
         }
     }
 
-    private void ShowHelp()
+    private void WriteHelpLines()
     {
         Console.WriteLine("Available commands:");
         Console.WriteLine("move <north|south|east|west> - Move in a direction");
@@ -163,14 +162,14 @@ public class Game
         Console.WriteLine("? - Show this help message");
     }
 
-    private void ShowUnknownCommandMessage()
+    private void WriteUnknownCommandMessage()
     {
         Console.WriteLine("Unknown command. Try '?' for help.");
     }
 
     private void ExitGame()
     {
-        gameRunning = false;
+        isGameRunning = false;
         Console.WriteLine("Game exited.");
     }
 
@@ -185,24 +184,39 @@ public class Game
     private void EncounterEnemy()
     {
         Console.WriteLine("Encountered an enemy!");
-        int enemyHealth = 5;
-        while (enemyHealth > 0 && health > 0)
-        {
-            Console.WriteLine("Fight or Run?");
-            Action action = ParseAction(Console.ReadLine().ToLower());
+        InteractWithEnemyWhileEitherAlive(enemyHealth);
+    }
 
-            switch (action)
-            {
-                case Action.Fight:
-                    enemyHealth = PerformFightAction(enemyHealth);
-                    break;
-                case Action.Run:
-                    Console.WriteLine("You ran away!");
-                    return;
-                default:
-                    Console.WriteLine("Invalid action!");
-                    break;
-            }
+    private void InteractWithEnemyWhileEitherAlive(int enemyHealth)
+    {
+        while (enemyHealth > 0 && playersHealth > 0)
+        {
+            Action action = ParseEnemyAction();
+            TakeEnemyActionWithHealth(action, enemyHealth);
+        }
+
+    }
+
+    private Action ParseEnemyAction()
+    {
+        Console.WriteLine("Fight or Run?");
+        Action action = ParseAction(Console.ReadLine().ToLower());
+        return action;
+    }
+
+    private void TakeEnemyActionWithHealth(Action action, int enemyHealth)
+    {
+        switch (action)
+        {
+            case Action.Fight:
+                enemyHealth = PerformFightAction(enemyHealth);
+                break;
+            case Action.Run:
+                Console.WriteLine("You ran away!");
+                return;
+            default:
+                Console.WriteLine("Invalid action!");
+                break;
         }
     }
 
@@ -213,14 +227,7 @@ public class Game
 
         if (enemyHealth > 0)
         {
-            Console.WriteLine("Enemy hits you!");
-            health -= 2;
-
-            if (health <= 0)
-            {
-                Console.WriteLine("You are defeated!");
-                gameRunning = false;
-            }
+            HandleEnemyHit();
         }
         else
         {
@@ -229,6 +236,19 @@ public class Game
 
         return enemyHealth;
     }
+
+    private void HandleEnemyHit()
+    {
+        Console.WriteLine("Enemy hits you!");
+        playersHealth -= 2;
+
+        if (playersHealth <= 0)
+        {
+            Console.WriteLine("You are defeated!");
+            isGameRunning = false;
+        }
+    }
+
 }
 
 class Program
