@@ -13,15 +13,6 @@ public class Game
         Help,
     }
 
-    private enum Direction
-    {
-        Unknown,
-        North,
-        South,
-        East,
-        West,
-    }
-
     private enum Action
     {
         Unknown,
@@ -29,7 +20,7 @@ public class Game
         Run,
     }
 
-    private int x = 0, y = 0;
+    private Point point = new Point(0, 0); 
     private List<string> items = new List<string>();
     private int playersHealth = 10;
     private bool isGameRunning = true;
@@ -56,7 +47,7 @@ public class Game
         switch (command)
         {
             case Command.Exit: ExitGame(); break;
-            case Command.Move: MovePlayer(ParseDirection(argument)); break;
+            case Command.Move: TryMovingPlayer(ParseDirection(argument)); break;
             case Command.Pick: PickItem(argument); break;
             case Command.Use: UseItem(argument); break;
             case Command.Help: WriteHelpLines(); break;
@@ -83,30 +74,21 @@ public class Game
         Console.WriteLine("Game exited.");
     }
 
-    private void MovePlayer(Direction direction)
+    private void TryMovingPlayer(Direction direction)
     {
-        bool moved = ChangePositionForMovement(direction);
-        if (!moved)
+        try
+        {
+            point.Move(direction);
+            Console.WriteLine($"Position: {point.x}, {point.y}");
+            RandomEncounter();
+        }
+        catch (System.ArgumentException)
         {
             Console.WriteLine("Invalid direction. Try 'move <north|south|east|west>'.");
             return;
         }
-        Console.WriteLine($"Position: {x}, {y}");
-        RandomEncounter();
     }
 
-    private bool ChangePositionForMovement(Direction direction)
-    {
-        bool moved = direction switch
-        {
-            Direction.North => (++y, true).Item2,
-            Direction.South => (--y, true).Item2,
-            Direction.East => (++x, true).Item2,
-            Direction.West => (--x, true).Item2,
-            _ => false,
-        };
-        return moved;
-    }
 
     private void RandomEncounter()
     {
@@ -241,6 +223,41 @@ public class Game
     }
 
 }
+
+
+public class Point
+{
+    public int x { get; set; }
+    public int y { get; set; }
+
+    public Point(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void Move(Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.North: y++; break;
+            case Direction.South: y--; break;
+            case Direction.East: x++; break;
+            case Direction.West: x--; break;
+            default: throw new ArgumentException("Invalid direction");
+        }
+    }
+}
+
+public enum Direction
+{
+    Unknown,
+    North,
+    South,
+    East,
+    West,
+}
+
 
 class Program
 {
