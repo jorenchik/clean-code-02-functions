@@ -77,26 +77,10 @@ public class Game
         };
     }
 
-    private Direction ParseDirection(string direction)
+    private void ExitGame()
     {
-        return direction switch
-        {
-            "north" => Direction.North,
-            "south" => Direction.South,
-            "east" => Direction.East,
-            "west" => Direction.West,
-            _ => Direction.Unknown,
-        };
-    }
-
-    private Action ParseAction(string action)
-    {
-        return action switch
-        {
-            "fight" => Action.Fight,
-            "run" => Action.Run,
-            _ => Action.Unknown,
-        };
+        isGameRunning = false;
+        Console.WriteLine("Game exited.");
     }
 
     private void MovePlayer(Direction direction)
@@ -124,6 +108,36 @@ public class Game
         return moved;
     }
 
+    private void RandomEncounter()
+    {
+        if (rand.Next(0, 5) == 2)
+        {
+            EncounterEnemy();
+        }
+    }
+
+    private Direction ParseDirection(string direction)
+    {
+        return direction switch
+        {
+            "north" => Direction.North,
+            "south" => Direction.South,
+            "east" => Direction.East,
+            "west" => Direction.West,
+            _ => Direction.Unknown,
+        };
+    }
+
+    private Action ParseAction(string action)
+    {
+        return action switch
+        {
+            "fight" => Action.Fight,
+            "run" => Action.Run,
+            _ => Action.Unknown,
+        };
+    }
+
     private void PickItem(string item)
     {
         if (string.IsNullOrEmpty(item))
@@ -143,13 +157,9 @@ public class Game
             return;
         }
         if (items.Remove(item))
-        {
             Console.WriteLine($"Using {item}");
-        }
         else
-        {
             Console.WriteLine($"Don't have {item}");
-        }
     }
 
     private void WriteHelpLines()
@@ -167,19 +177,7 @@ public class Game
         Console.WriteLine("Unknown command. Try '?' for help.");
     }
 
-    private void ExitGame()
-    {
-        isGameRunning = false;
-        Console.WriteLine("Game exited.");
-    }
 
-    private void RandomEncounter()
-    {
-        if (rand.Next(0, 5) == 2)
-        {
-            EncounterEnemy();
-        }
-    }
 
     private void EncounterEnemy()
     {
@@ -224,16 +222,10 @@ public class Game
     {
         Console.WriteLine("You hit the enemy!");
         enemyHealth -= 2;
-
         if (enemyHealth > 0)
-        {
             HandleEnemyHit();
-        }
         else
-        {
             Console.WriteLine("Enemy defeated!");
-        }
-
         return enemyHealth;
     }
 
@@ -241,7 +233,6 @@ public class Game
     {
         Console.WriteLine("Enemy hits you!");
         playersHealth -= 2;
-
         if (playersHealth <= 0)
         {
             Console.WriteLine("You are defeated!");
